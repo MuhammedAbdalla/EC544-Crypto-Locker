@@ -18,11 +18,14 @@
 // for the signal handling
 #include <signal.h>
 
-#define FAILURE -1
+#define FAILURE 0
 #define SUCCESS 1
 
 int main(int argc, char const* argv[]) {
     int PORT;
+
+    printf("Server IP: %s\n", argv[1]);
+    printf("Client IP: %s\n", argv[2]);
 
     if (getenv("PORT")) {
         PORT = atoi(getenv("PORT"));
@@ -32,7 +35,7 @@ int main(int argc, char const* argv[]) {
 
     int status, valread, client_fd;
     struct sockaddr_in serv_addr;
-    char* msg = "requesting resource";
+    char msg[1024] = "client requesting resource: ";
     char buffer[1024] = {0};
 
     client_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -46,7 +49,7 @@ int main(int argc, char const* argv[]) {
   
     // Convert IPv4 and IPv6 addresses from text to binary
     // form
-    if (inet_pton(AF_INET, "127.0.1.1", &serv_addr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, argv[1], &serv_addr.sin_addr) <= 0) {
         printf("\nInvalid address/ Address not supported \n");
         return FAILURE;
     }
@@ -60,10 +63,19 @@ int main(int argc, char const* argv[]) {
     // //Send some data - HTTP example
 	// message = "GET / HTTP/1.1\r\n\r\n";
 
-    send(client_fd, msg, strlen(msg), 0);
-    printf("message sent\n");
+    printf("[%s] msg: %s\n",argv[2], msg);
+    if (send(client_fd, msg, strlen(msg), 0) == -1) {
+		printf("message failed\n");
+    } else {
+        printf("message sent\n");
+    }
+
     valread = read(client_fd, buffer, 1024);
-    printf("%s\n", buffer);
+    if (valread == -1) {
+        // close the socket and continue reading in new clients
+        perror("read");
+        close(client_fd);
+    }
   
     // closing the connected socket
     close(client_fd);

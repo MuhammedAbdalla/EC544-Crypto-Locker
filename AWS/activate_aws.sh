@@ -5,11 +5,12 @@ EC2_INSTANCE=ec2-user@18.222.161.150
 if [[ -d $KEYS_FOLDER ]]; then
     echo "keys folder exists"
 else
-    mkdir ~/.keys
-    chmod 0600 ~/.keys
+    mkdir $KEYS_FOLDER
+    # chmod 700 $KEYS_FOLDER
     echo "successfully added Key Folder"
 fi
 
+echo $KEYS_FOLDER"/"$EC2KEY
 if [[ -f $KEYS_FOLDER"/"$EC2KEY ]]; then
     echo "AWS EC2 key exists"
 else
@@ -17,6 +18,5 @@ else
     chmod 0400 $KEYS_FOLDER"/"$EC2KEY
     echo "successfully added EC2 Key"
 fi
-
 
 # ssh -i $KEYS_FOLDER"/"$EC2KEY $EC2_INSTANCE

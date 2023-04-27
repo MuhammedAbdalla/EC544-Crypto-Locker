@@ -9,6 +9,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
+
+// open()
+#include <fcntl.h>
+
 // socket
 #include <sys/socket.h>
 
@@ -19,13 +23,11 @@
 #include <signal.h>
 #include "lockerserver.h"
 
-
-
 pid_t pid, childpid;     
 int status;
 
 int execute_sys_cmd(char* text, char* error) {
-	char* cmd;
+	char *cmd;
 	strcpy(cmd, text);
 	if (system(cmd) == -1) {
 		perror(error);
@@ -39,10 +41,10 @@ int main(int argc, char const* argv[]) {
 	struct sockaddr_in address;
 	struct hostent *host_entry;
 
-	int8_t server_fd, new_socket, valread, opt, addrlen;
-	char *ACK, *server_ip, host[256];
+	int server_fd, client_fd, valread, opt, addrlen;
+	char *ACK, *cmd, *server_ip, host[256];
 	char buffer[1024] = {0};
-
+	
 	opt = 1;
 	addrlen = sizeof(address);
 
@@ -103,24 +105,30 @@ int main(int argc, char const* argv[]) {
 
 	if (pid == 0) {
 		int status = 0b0;
+		char IPv4[16];
 
-		printf("executing SSH commands...\n");
-		status = execute_sys_cmd("./AWS/activate_aws.sh", "activate AWS SSH") << 1;
-		status = status | execute_sys_cmd("ssh -i ~/.keys/ec2sshkey.pem ec2-user@18.222.161.150 echo hello EC2 :)", "connect AWS ssh");
+		printf("connecting to AWS cloud...\n");
 
-		printf("status %0xb\n", status);
-		if (status == 0b11) {
-			exit(SUCCESS);
-		} else {
+		strcpy(cmd, "./AWS/activate_aws.sh");
+		if (system(cmd) == -1) {
+			perror("activate AWS ssh");
 			exit(FAILURE);
 		}
+		
+		strcpy(cmd, "./AWS/connect_aws.sh");
+		if (system(cmd) == -1){
+			perror("connect AWS ssh");
+			exit(FAILURE);
+		}
+		
+		exit(SUCCESS);
 		
 	} else if (pid == -1) {
 		perror("fork");
 		exit(FAILURE);
 	} else {
 		childpid = waitpid(-1, &status, 0);
-		printf("Status 0b%d\n",status);
+		printf("status %d\n",status);
 		if (WIFEXITED(status) == -1){
 			return FAILURE;
 		} else {
@@ -134,25 +142,34 @@ int main(int argc, char const* argv[]) {
 			return FAILURE;
 		}
 
-
-		new_socket = accept(server_fd, (struct sockaddr*)&address,(socklen_t*)&addrlen);
-		if (new_socket == -1) {
+		client_fd = accept(server_fd, (struct sockaddr*)&address,(socklen_t*)&addrlen);
+		if (client_fd == -1) {
 			perror("accept");
 			return FAILURE;
 		}
 
-		valread = read(new_socket, buffer, 1024);
+		// read the incoming message
+		valread = read(client_fd, buffer, 1024);
 		if (valread == -1) {
+			// close the socket and continue reading in new clients
 			perror("read");
-			return FAILURE;
+			close(client_fd);
+			continue;
 		}
-		printf("%s\n", buffer);
-		send(new_socket, ACK, strlen(ACK), 0);
-		printf("Hello message sent\n");
+
+		// send back a server response
+		printf("[SERVER] msg: %s\t...", buffer);
+		if (send(client_fd, ACK, strlen(ACK), 0) == -1) {
+			printf("message failed\n");
+			close(client_fd);
+		} else {
+			printf("message sent\n");
+		}
+
+		// closing the connected client socket
+    	close(client_fd);
 	}
 
-    // closing the connected socket
-    close(new_socket);
     // closing the listening socket
     shutdown(server_fd, SHUT_RDWR);
     return SUCCESS;
