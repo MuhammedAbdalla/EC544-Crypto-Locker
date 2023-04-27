@@ -1,21 +1,34 @@
 // source material
 // https://www.geeksforgeeks.org/socket-programming-cc/
 
+#include <netdb.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+// socket
+#include <sys/socket.h>
 
+// waitpid
+#include <sys/wait.h> 
+
+// for the signal handling
+#include <signal.h>
+
+#define FAILURE -1
+#define SUCCESS 1
 
 int main(int argc, char const* argv[]) {
-    if (!getenv("PORT")) {
-        perror("port");
-        exit(EXIT_FAILURE);
-    }
+    int PORT;
 
-    const int PORT = atoi(getenv("PORT"));
+    if (getenv("PORT")) {
+        PORT = atoi(getenv("PORT"));
+    } else {
+        PORT = 8080;
+    } 
 
     int status, valread, client_fd;
     struct sockaddr_in serv_addr;
@@ -25,7 +38,7 @@ int main(int argc, char const* argv[]) {
     client_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (client_fd == -1) {
         printf("\n Socket creation error \n");
-        return -1;
+        return FAILURE;
     }
   
     serv_addr.sin_family = AF_INET;
@@ -33,16 +46,19 @@ int main(int argc, char const* argv[]) {
   
     // Convert IPv4 and IPv6 addresses from text to binary
     // form
-    if (inet_pton(AF_INET, "172.20.185.58", &serv_addr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, "127.0.1.1", &serv_addr.sin_addr) <= 0) {
         printf("\nInvalid address/ Address not supported \n");
-        return -1;
+        return FAILURE;
     }
   
     status = connect(client_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     if (status == -1) {
         printf("\nConnection Failed \n");
-        return -1;
+        return FAILURE;
     }
+
+    // //Send some data - HTTP example
+	// message = "GET / HTTP/1.1\r\n\r\n";
 
     send(client_fd, msg, strlen(msg), 0);
     printf("message sent\n");
@@ -52,5 +68,5 @@ int main(int argc, char const* argv[]) {
     // closing the connected socket
     close(client_fd);
 
-    return 0;
+    return SUCCESS;
 }
