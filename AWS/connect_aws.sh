@@ -1,3 +1,5 @@
+#!/bin/bash
+
 device_ipv4=.keys/device_ipv4.pem
 AWS_SSH="ssh -i ~/.keys/ec2sshkey.pem ec2-user@18.222.161.150"
 

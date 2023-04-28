@@ -1,3 +1,5 @@
+#!/bin/bash
+
 KEYS_FOLDER=~/.keys
 EC2KEY=ec2sshkey.pem
 EC2_INSTANCE=ec2-user@18.222.161.150

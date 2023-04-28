@@ -25,7 +25,7 @@ int main(int argc, char const* argv[]) {
     int PORT;
 
     printf("Server IP: %s\n", argv[1]);
-    printf("Client IP: %s\n", argv[2]);
+    printf("Client IP: %s\n\n\n", argv[2]);
 
     if (getenv("PORT")) {
         PORT = atoi(getenv("PORT"));
@@ -35,7 +35,7 @@ int main(int argc, char const* argv[]) {
 
     int status, valread, client_fd;
     struct sockaddr_in serv_addr;
-    char msg[1024] = "client requesting resource: ";
+    char msg[1024] = "(NULL)";
     char buffer[1024] = {0};
 
     client_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -50,24 +50,24 @@ int main(int argc, char const* argv[]) {
     // Convert IPv4 and IPv6 addresses from text to binary
     // form
     if (inet_pton(AF_INET, argv[1], &serv_addr.sin_addr) <= 0) {
-        printf("\nInvalid address/ Address not supported \n");
+        printf("\nInvalid address/ Address not supported\n");
         return FAILURE;
     }
   
     status = connect(client_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     if (status == -1) {
-        printf("\nConnection Failed \n");
+        printf("\nConnection Failed\n");
         return FAILURE;
     }
 
     // //Send some data - HTTP example
 	// message = "GET / HTTP/1.1\r\n\r\n";
 
-    printf("[%s] msg: %s\n",argv[2], msg);
+    printf("[client] %s: %s\n",argv[2], argv[3] != NULL ? argv[3] : msg);
     if (send(client_fd, msg, strlen(msg), 0) == -1) {
-		printf("message failed\n");
+		printf("\tmessage failed\n");
     } else {
-        printf("message sent\n");
+        printf("\tmessage sent\n");
     }
 
     valread = read(client_fd, buffer, 1024);

@@ -158,12 +158,12 @@ int main(int argc, char const* argv[]) {
 		}
 
 		// send back a server response
-		printf("[SERVER] msg: %s\t...", buffer);
+		printf("[SERVER] ""client: %s...""\n", buffer);
 		if (send(client_fd, ACK, strlen(ACK), 0) == -1) {
-			printf("message failed\n");
+			printf("\tmessage failed\n");
 			close(client_fd);
 		} else {
-			printf("message sent\n");
+			printf("\tmessage sent\n");
 		}
 
 		// closing the connected client socket
