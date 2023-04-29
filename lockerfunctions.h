@@ -51,12 +51,12 @@
             - we get 4pm as end_time from front end calculations
         - we get to shift 0s 12 times, 1s 4 shifts, 0s rest
     */
-    static struct locker_reservations *reservations = NULL;
+    static struct locker_reservations *reservations;
 
     struct user_reservation set_bit_duration(int start_idx, int end_idx);
 
     // print all reservation details
-    void print_reservations();
+    void print_reservations(struct locker_reservations*);
         
     // searches for reservations
     // returns null if none found

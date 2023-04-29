@@ -27,49 +27,16 @@ pid_t pid, childpid;
 int status;
 
 // instantiate a bit array of locker
-static int bit_reservations[HOURS_IN_DAY * (MINS_IN_HOURS/LOCKER_MIN_TIME_RESERVE)] = {0};
-
-
-void test_reservations() {
-	char* data2[4] = {"test.client.ip2", "12:30am", "3:30am", "3"};
-
-	for (int i = 0; i < 10; i++) {
-		char buffer[32];
-		sprintf(buffer,"test.client.%d",i);
-
-		char* data[4] = {buffer, "ts", "te", "duration"};
-		create_reservation(data);
-	}
-
-	print_reservations();
-
-	delete_reservation("test.client.0");
-
-	delete_reservation("test.client.3");
-
-	delete_reservation("test.client.10");
-
-
-	for (int i = 6; i < 15; i++) {
-		char buffer[32];
-		sprintf(buffer,"test.client.%d",i);
-
-		char* data[4] = {buffer, "ts", "te", "duration"};
-		create_reservation(data);
-	}
-
-	print_reservations();
-
-	exit(SUCCESS);
-}
+// static int bit_reservations[HOURS_IN_DAY * (MINS_IN_HOURS/LOCKER_MIN_TIME_RESERVE)] = {0};
 
 
 int main(int argc, char const* argv[]) {
-	test_reservations();
 	struct sockaddr_in address;
-
+	reservations = NULL;
+	
 	int server_fd, client_fd, valread, opt, addrlen;
-	char *ACK, *cmd, host[256];
+	char *ACK = "ACK";
+	char cmd[256];
 	char buffer[1024] = {0};
 	
 	opt = 1;
@@ -127,7 +94,7 @@ int main(int argc, char const* argv[]) {
 	} else {
 		childpid = waitpid(-1, &status, 0);
 		printf("status %d\n",status);
-		if (WIFEXITED(status) == -1){
+		if (!WIFEXITED(status)){
 			return FAILURE;
 		} else {
 			printf("ssh completed\n");
