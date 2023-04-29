@@ -29,7 +29,9 @@
 
     // linked list of all reservations attached to locker
     struct locker_reservations {
-        struct user_reservation *user_reservations;
+        struct user_reservation *head;
+        struct user_reservation *tail;
+        
         int LOCKED;
         char* USER;
     };
@@ -51,7 +53,7 @@
     struct user_reservation set_bit_duration(int start_idx, int end_idx);
 
     // print all reservation details
-    void print_reservations();
+    void print_reservations(struct locker_reservations*);
         
     // searches for reservations
     // returns null if none found
