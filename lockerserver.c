@@ -23,8 +23,15 @@
 #include <signal.h>
 #include "lockerserver.h"
 
+#define HOURS_IN_DAY 24
+#define LOCK_INC_MINS 30
+
 pid_t pid, childpid;     
 int status;
+
+
+// instantiate a bit array of locker
+char half_hour_segments[HOURS_IN_DAY * (60/LOCK_INC_MINS)] = {0};
 
 int execute_sys_cmd(char* text, char* error) {
 	char *cmd;
@@ -33,9 +40,10 @@ int execute_sys_cmd(char* text, char* error) {
 		perror(error);
 		return FAILURE;
 	}
-
 	return SUCCESS;
 }
+
+
 
 int main(int argc, char const* argv[]) {
 	struct sockaddr_in address;
@@ -158,7 +166,7 @@ int main(int argc, char const* argv[]) {
 		}
 
 		// send back a server response
-		printf("[SERVER] ""client: %s...""\n", buffer);
+		printf("[SERVER] \"client: %s key...\"\n", buffer);
 		if (send(client_fd, ACK, strlen(ACK), 0) == -1) {
 			printf("\tmessage failed\n");
 			close(client_fd);

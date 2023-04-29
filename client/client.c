@@ -25,7 +25,8 @@ int main(int argc, char const* argv[]) {
     int PORT;
 
     printf("Server IP: %s\n", argv[1]);
-    printf("Client IP: %s\n\n\n", argv[2]);
+    printf("Client IP: %s\n", argv[2]);
+    printf("msg %s\n\n\n", argv[3]);
 
     if (getenv("PORT")) {
         PORT = atoi(getenv("PORT"));
@@ -63,7 +64,10 @@ int main(int argc, char const* argv[]) {
     // //Send some data - HTTP example
 	// message = "GET / HTTP/1.1\r\n\r\n";
 
-    printf("[client] %s: %s\n",argv[2], argv[3] != NULL ? argv[3] : msg);
+    if (argv[3] != NULL) 
+        strcpy(msg, argv[3]);
+
+    printf("[client] %s: %s\n",argv[2], msg);
     if (send(client_fd, msg, strlen(msg), 0) == -1) {
 		printf("\tmessage failed\n");
     } else {
