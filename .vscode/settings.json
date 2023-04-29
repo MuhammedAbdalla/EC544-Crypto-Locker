@@ -5,7 +5,9 @@
         "signal.h": "c",
         "lockerserver.h": "c",
         "fcntl.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "typeinfo": "c",
+        "lockerfunctions.h": "c"
     },
     "idf.espIdfPathWin": "C:\\Users\\Muhab\\esp\\esp-idf",
     "idf.pythonBinPathWin": "C:\\Users\\Muhab\\.espressif\\python_env\\idf5.0_py3.8_env\\Scripts\\python.exe",

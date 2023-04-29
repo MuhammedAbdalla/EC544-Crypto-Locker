@@ -21,36 +21,20 @@
 
 // for the signal handling
 #include <signal.h>
-#include "lockerserver.h"
-
-#define HOURS_IN_DAY 24
-#define LOCK_INC_MINS 30
+#include "lockerfunctions.h"
 
 pid_t pid, childpid;     
 int status;
 
-
 // instantiate a bit array of locker
-char half_hour_segments[HOURS_IN_DAY * (60/LOCK_INC_MINS)] = {0};
-
-int execute_sys_cmd(char* text, char* error) {
-	char *cmd;
-	strcpy(cmd, text);
-	if (system(cmd) == -1) {
-		perror(error);
-		return FAILURE;
-	}
-	return SUCCESS;
-}
-
-
+int bit_reservations[HOURS_IN_DAY * (MINS_IN_HOURS/LOCKER_MIN_TIME_RESERVE)] = {0};
 
 int main(int argc, char const* argv[]) {
 	struct sockaddr_in address;
-	struct hostent *host_entry;
+	reservations = malloc(sizeof(struct locker_reservations));
 
 	int server_fd, client_fd, valread, opt, addrlen;
-	char *ACK, *cmd, *server_ip, host[256];
+	char *ACK, *cmd, host[256];
 	char buffer[1024] = {0};
 	
 	opt = 1;
@@ -74,32 +58,6 @@ int main(int argc, char const* argv[]) {
 	address.sin_addr.s_addr = INADDR_ANY;
 	address.sin_port = htons(PORT);
 
-	// // get IP and Host Name of Server (self)
-	// if (gethostname(host, sizeof(host)) == -1) {
-	// 	perror("gethostname");
-	// 	return FAILURE;
-	// }
-
-	// if ((host_entry = gethostbyname(host)) == NULL) {
-	// 	perror("gethostentry");
-	// 	return FAILURE;
-	// }
-
-	// int ip_list_size = (sizeof(host_entry->h_addr_list)/sizeof(host_entry->h_addr_list[0]));
-	// for (int i = 0; i < ip_list_size; i++) {
-	// 	if ( (server_ip = inet_ntoa( *((struct in_addr*) host_entry->h_addr_list[0]))) != NULL) {
-	// 		printf("IP %d: %s\n", i, server_ip);
-	// 	}
-	// }
-
-	// if ( (server_ip = inet_ntoa( *((struct in_addr*) host_entry->h_addr_list[0]))) == NULL) {
-	// 	perror("inet_ntoa");
-	// 	return FAILURE;
-	// }
-	
-	// printf("Current Host Name: %s\n", host);
-   	// printf("Host IP: %s\n", server_ip);
-
 	// bind
     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
         perror("bind failed");
@@ -108,12 +66,10 @@ int main(int argc, char const* argv[]) {
 
 	// printf("starting server on:\n");
 
-	
 	pid = fork();
 
 	if (pid == 0) {
 		int status = 0b0;
-		char IPv4[16];
 
 		printf("connecting to AWS cloud...\n");
 
@@ -163,6 +119,16 @@ int main(int argc, char const* argv[]) {
 			perror("read");
 			close(client_fd);
 			continue;
+		}
+
+		if (strcmp(buffer, "CREATE")) {
+
+		} else if (strcmp(buffer, "DELETE")) {
+
+		} else if (strcmp(buffer, "MODIFY")) {
+
+		} else {
+			perror("locker command");
 		}
 
 		// send back a server response

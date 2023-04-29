@@ -26,7 +26,7 @@ int main(int argc, char const* argv[]) {
 
     printf("Server IP: %s\n", argv[1]);
     printf("Client IP: %s\n", argv[2]);
-    printf("msg %s\n\n\n", argv[3]);
+    printf("Locker COMMAND: %s\n\t[[Locker Duration: %dhr]]\n\t[[Start time: %s]]\n\t[[End time: %s]]\n\n\n", argv[3], atoi(argv[4]), argv[5], argv[6]);
 
     if (getenv("PORT")) {
         PORT = atoi(getenv("PORT"));
