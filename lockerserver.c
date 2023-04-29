@@ -26,145 +26,43 @@
 pid_t pid, childpid;     
 int status;
 
-static struct locker_reservations *reservations = NULL;
-
 // instantiate a bit array of locker
 static int bit_reservations[HOURS_IN_DAY * (MINS_IN_HOURS/LOCKER_MIN_TIME_RESERVE)] = {0};
 
 
-void print_reservations(struct locker_reservations *reservations) {
-	printf(" LOCKER: print_reservations\n");
-	struct user_reservation *element = reservations->head;
-	while (element != NULL) {
-		printf("  User: %s\n", element->name);
-		element = element -> next;
-	}
-}
-
-
-struct user_reservation* search_reservation(char* name) {
-	if (reservations != NULL) {
-		printf(" LOCKER: search_reservation");
-		struct user_reservation *element = reservations->head;
-		// go to the end
-		while (element != NULL) {
-			// printf("%s\n",elgit ement -> name);
-			if (strcmp(element->name, name) == 0) {
-				printf("  found %s\n",element->name);
-				return element;
-			}
-			element = element -> next;
-		}
-	}
-	printf(" NULL\n");
-	return NULL;
-}
-
-
-struct user_reservation* create_reservation(char** entry_data) {
-	printf(" LOCKER: create_reservation: ");
-
-	if (reservations == NULL) {
-		printf("first entry ");
-
-		// malloc the linked list
-		reservations = malloc(sizeof(struct locker_reservations));
-		reservations -> head = malloc(sizeof(struct user_reservation));
-
-		reservations -> head->name = strdup(entry_data[0]);
-		reservations -> head->start_time = strdup(entry_data[1]);
-		reservations -> head->end_time = strdup(entry_data[2]);
-		reservations -> head->duration_hours = atoi(entry_data[3]);
-
-		reservations -> head -> next = NULL;	
-	} else {
-		printf("append entry\n");
-		if (search_reservation(entry_data[0]) == NULL) {
-			struct user_reservation* cursor = reservations->head;
-
-			while (cursor->next!=NULL)
-				cursor=cursor->next;
-			
-
-			/*
-			char* name;
-			char* start_time;
-			char* end_time;
-
-			int KEY;
-			int start_time_idx;
-			int end_time_idx;
-
-			int duration_hours;
-			int bit_duration;
-			*/
-		
-			struct user_reservation* newReservation = malloc(sizeof(struct user_reservation));
-			
-			newReservation->name = strdup(entry_data[0]);
-			newReservation->start_time = strdup(entry_data[1]);
-			newReservation->end_time = strdup(entry_data[2]);
-			newReservation->duration_hours = atoi(entry_data[3]);
-			newReservation -> next = NULL;	
-
-			cursor->next= newReservation;
-
-			return newReservation;
-		}	
-	}
-	return NULL;
-}
-
-
-struct user_reservation* delete_reservation(char* name) {
-	if (reservations != NULL) {
-		printf(" LOCKER: delete_reservation\n");
-		if (search_reservation(name) != NULL) {
-			struct user_reservation* prev = NULL;
-			struct user_reservation* curr = reservations->head;
-			struct user_reservation* next = reservations->head->next;
-
-			// if first element first element of the LL
-			if (strcmp(curr->name, name) == 0) {
-				reservations->head = reservations->head->next;
-				return curr;
-			}
-
-			while (strcmp(curr->name, name) != 0 && curr != NULL) {
-				prev = curr;
-				curr = next;
-				next = curr->next;
-			}
-
-			if (prev)
-				prev -> next = next;
-
-			return curr;
-		}
-	}
-	return NULL;
-}
-
-
-struct user_reservation* modify_reservation(char* name) {
-	return NULL;
-}
-
-void test_reservations(){
-	char* data1[4] = {"test.client.ip1", "12:30am", "3:30am", "3"};
+void test_reservations() {
 	char* data2[4] = {"test.client.ip2", "12:30am", "3:30am", "3"};
 
-	struct user_reservation* new;
+	for (int i = 0; i < 10; i++) {
+		char buffer[32];
+		sprintf(buffer,"test.client.%d",i);
 
-	create_reservation(data1);
-	print_reservations(reservations);
-	create_reservation(data2);
-	print_reservations(reservations);
-	delete_reservation("test.client.ip1");
-	print_reservations(reservations);
+		char* data[4] = {buffer, "ts", "te", "duration"};
+		create_reservation(data);
+	}
+
+	print_reservations();
+
+	delete_reservation("test.client.0");
+
+	delete_reservation("test.client.3");
+
+	delete_reservation("test.client.10");
+
+
+	for (int i = 6; i < 15; i++) {
+		char buffer[32];
+		sprintf(buffer,"test.client.%d",i);
+
+		char* data[4] = {buffer, "ts", "te", "duration"};
+		create_reservation(data);
+	}
+
+	print_reservations();
 
 	exit(SUCCESS);
 }
+
 
 int main(int argc, char const* argv[]) {
 	test_reservations();
@@ -206,10 +104,9 @@ int main(int argc, char const* argv[]) {
 	pid = fork();
 
 	if (pid == 0) {
-		int status = 0b0;
+		// int status = 0b0;
 
 		printf("connecting to AWS cloud...\n");
-
 		strcpy(cmd, "./AWS/activate_aws.sh");
 		if (system(cmd) == -1) {
 			perror("activate AWS ssh");
@@ -257,8 +154,7 @@ int main(int argc, char const* argv[]) {
 			close(client_fd);
 			continue;
 		} else {
-			struct user_reservation *new;
-			char **data;
+			char *data[4] = {"192.168.0.1", "12:30am", "3:30am", "3"};
 			if (strcmp(buffer, "CREATE") == 0) {
 				create_reservation(data);
 			} else if (strcmp(buffer, "DELETE") == 0) {

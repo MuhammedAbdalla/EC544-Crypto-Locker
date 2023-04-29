@@ -1,4 +1,4 @@
-#include "lockerserver.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,8 +13,32 @@
 
 int main(void)
 {
-	struct pipeline* my_pipeline = pipeline_build("ls\n   &");
+	
+	char* data2[4] = {"test.client.ip2", "12:30am", "3:30am", "3"};
 
-	// Test that a pipeline was returned
-	TEST_ASSERT(my_pipeline != NULL);
+	for (int i = 0; i < 10; i++) {
+		char* data[4] = {sprintf("test.client.ip%s", i+""), "12:30am", "3:30am", "3"};
+		create_reservation(data);
+	}
+
+	print_reservations(reservations);
+
+	delete_reservation("test.client.ip1");
+
+	print_reservations(reservations);
+
+	delete_reservation("test.client.ip3");
+
+	print_reservations(reservations);
+
+	delete_reservation("test.client.ip10");
+
+	print_reservations(reservations);
+
+	for (int i = 6; i < 15; i++) {
+		char* data[4] = {sprintf("test.client.ip%d",i), "12:30am", "3:30am", "3"};
+		create_reservation(data);
+	}
+
+	return 0;
 }
