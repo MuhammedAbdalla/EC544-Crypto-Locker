@@ -26,12 +26,128 @@
 pid_t pid, childpid;     
 int status;
 
+static struct locker_reservations *reservations;
+
 // instantiate a bit array of locker
-int bit_reservations[HOURS_IN_DAY * (MINS_IN_HOURS/LOCKER_MIN_TIME_RESERVE)] = {0};
+static int bit_reservations[HOURS_IN_DAY * (MINS_IN_HOURS/LOCKER_MIN_TIME_RESERVE)] = {0};
+
+
+void print_reservations() {
+	if (reservations != NULL) {
+		printf(" LOCKER: print_reservations\n");
+		struct user_reservation *element = reservations -> user_reservations;
+		while (element != NULL) {
+			printf("Locker User: %s\n", element->name);
+			element = element -> next;
+		}
+	}
+}
+
+
+struct user_reservation* search_reservation(char* name) {
+	if (reservations != NULL) {
+		printf(" LOCKER: search_reservation\n");
+		struct user_reservation *element = reservations -> user_reservations;
+		// go to the end
+		while (element != NULL) {
+			// printf("%s\n",elgit ement -> name);
+			if (strcmp(element -> name, name) != 0)
+				return element;
+			element = element -> next;
+		}
+	}
+	return NULL;
+}
+
+
+struct user_reservation* create_reservation(char** entry_data) {
+	printf(" LOCKER: create_reservation: ");
+
+	struct user_reservation *element = NULL;
+
+	if (reservations == NULL) {
+		printf("first entry ");
+		reservations = malloc(sizeof(struct locker_reservations));
+	}
+
+	printf("append entry\n");
+	if (search_reservation(entry_data[0]) == NULL) {
+		
+
+		// malloc the actual reservation
+		reservations -> user_reservations = malloc(sizeof(struct user_reservation));
+
+		// create a pointer to tha malloc region
+		element = reservations -> user_reservations; 
+
+		// go to the end
+		while (element != NULL) {
+			element = element -> next;
+		}
+
+		/*
+		char* name;
+        char* start_time;
+        char* end_time;
+
+        int KEY;
+        int start_time_idx;
+        int end_time_idx;
+
+        int duration_hours;
+        int bit_duration;
+		*/
+
+		element = malloc(sizeof(struct user_reservation));
+
+		element -> name = strdup(entry_data[0]);
+		element -> start_time = strdup(entry_data[1]);
+		element -> end_time = strdup(entry_data[2]);
+		element -> duration_hours = atoi(entry_data[3]);
+
+		printf("%s\n",element->name);
+
+		element -> next = NULL;	
+	}
+
+	return element;
+	
+}
+
+
+struct user_reservation* delete_reservation(char* name) {
+	if (reservations != NULL) {
+		if (search_reservation(name) != NULL) {
+			printf(" LOCKER: delete_reservation\n");
+
+			struct user_reservation* prev = NULL;
+			struct user_reservation* curr = reservations -> user_reservations;
+			struct user_reservation* next = reservations -> user_reservations -> next;
+
+			//chain it
+			while (curr -> name != name && curr != NULL) {
+				prev = curr;
+				curr = next;
+				next = curr->next;
+			}
+
+			if (prev)
+				prev -> next = next;
+
+			return curr;
+		}
+	}
+	return NULL;
+}
+
+
+struct user_reservation* modify_reservation(char* name) {
+	return NULL;
+}
+
 
 int main(int argc, char const* argv[]) {
 	struct sockaddr_in address;
-	reservations = malloc(sizeof(struct locker_reservations));
 
 	int server_fd, client_fd, valread, opt, addrlen;
 	char *ACK, *cmd, host[256];
@@ -119,16 +235,20 @@ int main(int argc, char const* argv[]) {
 			perror("read");
 			close(client_fd);
 			continue;
-		}
-
-		if (strcmp(buffer, "CREATE")) {
-
-		} else if (strcmp(buffer, "DELETE")) {
-
-		} else if (strcmp(buffer, "MODIFY")) {
-
 		} else {
-			perror("locker command");
+
+			char* data[4] = {"test.client.ip", "12:30am", "3:30am", "3"};
+			struct user_reservation* new;
+			if (strcmp(buffer, "CREATE") == 0) {
+				new = create_reservation(data);
+			} else if (strcmp(buffer, "DELETE") == 0) {
+				new = delete_reservation("test.client.ip");
+			} else if (strcmp(buffer, "MODIFY") == 0) {
+
+			} else {
+				perror("locker command");
+			}
+			print_reservations();
 		}
 
 		// send back a server response
