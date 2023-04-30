@@ -11,6 +11,9 @@
     #define MINS_IN_HOURS 60
     #define LOCKER_MIN_TIME_RESERVE 30
 
+    #define SSID "wifi name"
+    #define PASS "wifi password"
+
     // a user reservation
     struct user_reservation {
         char* name;
