@@ -7,7 +7,6 @@
 
 void print_reservations(struct locker_reservations *R) {
 	printf(" LOCKER: print_reservations\n");
-    printf("%s\n",R->head->name);
 	struct user_reservation *element = R->head;
 	while (element != NULL) {
 		printf("  User: %s\n", element->name);
