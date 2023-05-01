@@ -11,7 +11,9 @@
         "array": "c",
         "string": "c",
         "string_view": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "*.tcc": "cpp",
+        "stdio.h": "c"
     },
     "idf.espIdfPathWin": "C:\\Users\\Muhab\\esp\\esp-idf",
     "idf.pythonBinPathWin": "C:\\Users\\Muhab\\.espressif\\python_env\\idf5.0_py3.8_env\\Scripts\\python.exe",

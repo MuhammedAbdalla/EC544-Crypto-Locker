@@ -1,4 +1,5 @@
 #include <stddef.h>
+
 #ifndef LOCKERSERVER_H
     #define LOCKERSERVER_H
 
@@ -11,8 +12,10 @@
     #define MINS_IN_HOURS 60
     #define LOCKER_MIN_TIME_RESERVE 30
 
-    #define SSID "wifi name"
-    #define PASS "wifi password"
+    #define SSID "HomeNetwork"
+    #define PASS "I3@(+)Fries&Ch1ck3n"
+
+    #define AWS_IP "3.145.164.11"
 
     // a user reservation
     struct user_reservation {
@@ -54,27 +57,11 @@
             - we get 4pm as end_time from front end calculations
         - we get to shift 0s 12 times, 1s 4 shifts, 0s rest
     */
-    static struct locker_reservations *reservations;
 
-    struct user_reservation set_bit_duration(int start_idx, int end_idx);
+    
+    int connect_aws(char*);
 
-    // print all reservation details
-    void print_reservations(struct locker_reservations*);
-        
-    // searches for reservations
-    // returns null if none found
-    struct user_reservation* search_reservation(char*);
-
-    // create new user reservation if name doesn't exist
-    // use name as client IP for uniqueness
-    struct user_reservation* create_reservation(char**);
-
-    // delete from LL if exists
-    struct user_reservation* delete_reservation(char*);
-
-    // delete from LL if exists
-    // set the bits FIRST then do bitwise XOR, then if bits overlap, return overlap error
-    struct user_reservation* modify_reservation(char*);
-
-
+    int ssh_setup(void);
+    
+    int test_reservations(void);
 #endif 

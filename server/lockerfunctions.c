@@ -1,121 +1,80 @@
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <netinet/in.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <sys/socket.h>
 #include <unistd.h>
-#include "lockerfunctions.h"
+#include "locker.h"
 
+int connect_aws(char* cmd) {
+    int status, valread, client_fd;
+    struct sockaddr_in serv_addr;
+    char msg[1024] = "null";
+    char buffer[1024] = {0};
 
-void print_reservations(struct locker_reservations *R) {
-	printf(" LOCKER: print_reservations\n");
-	struct user_reservation *element = R->head;
-	while (element != NULL) {
-		printf("  User: %s\n", element->name);
-		element = element -> next;
-	}
+    client_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_fd == -1) {
+        printf("\n Socket creation error \n");
+        return FAILURE;
+    }
+  
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(8080);
+  
+    // Convert IPv4 and IPv6 addresses from text to binary
+    if (inet_pton(AF_INET, "192.168.99.190", &serv_addr.sin_addr) <= 0) {
+        printf("\nInvalid address/ Address not supported\n");
+        return FAILURE;
+    }
+  
+    status = connect(client_fd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
+    if (status == -1) {
+        printf("\nConnection Failed\n");
+        return FAILURE;
+    }
+
+    // //Send some data - HTTP example
+	// message = "GET / HTTP/1.1\r\n\r\n";
+
+	strcpy(msg,cmd);
+    printf("[client]: %s\n", msg);
+    if (send(client_fd, msg, strlen(msg), 0) == -1) {
+		printf("\tmessage failed\n");
+    } else {
+        printf("\tmessage sent\n");
+    }
+
+    valread = read(client_fd, buffer, 1024);
+    if (valread == -1) {
+        // close the socket and continue reading in new clients
+        perror("read");
+        close(client_fd);
+    }
+	printf("[server]: %s\n", buffer);
+    // closing the connected socket
+    close(client_fd);
+
+	return SUCCESS;
 }
 
+int ssh_setup(void) {
+	char cmd[256];
 
-struct user_reservation* search_reservation(char* name) {
-	if (reservations != NULL) {
-		struct user_reservation *element = reservations->head;
-		// go to the end
-		while (element != NULL) {
-			// printf("%s\n",elgit ement -> name);
-			if (strcmp(element->name, name) == 0) {
-				printf(" LOCKER: search_reservation found %s\n",element->name);
-				return element;
-			}
-			element = element -> next;
-		}
+	printf("\n...connecting to AWS cloud...\n");
+	strcpy(cmd, "./server/AWS/activate_aws.sh");
+	if (system(cmd) == -1) {
+		perror("activate AWS ssh");
+		return FAILURE;
 	}
-	return NULL;
-}
 
-struct user_reservation* create_reservation(char** entry_data) {
-	printf(" LOCKER: create_reservation: ");
-
-	if (reservations == NULL) {
-		printf("first entry\n");
-
-		// malloc the linked list
-		reservations = malloc(sizeof(struct locker_reservations));
-		reservations -> head = malloc(sizeof(struct user_reservation));
-
-		reservations -> head->name = strdup(entry_data[0]);
-		reservations -> head->start_time = strdup(entry_data[1]);
-		reservations -> head->end_time = strdup(entry_data[2]);
-		reservations -> head->duration_hours = atoi(entry_data[3]);
-
-		reservations -> head -> next = NULL;	
-	} else {
-		printf("append entry\n");
-		if (search_reservation(entry_data[0]) == NULL) {
-			struct user_reservation* cursor = reservations->head;
-
-			while (cursor->next!=NULL)
-				cursor=cursor->next;
-			
-
-			/*
-			char* name;
-			char* start_time;
-			char* end_time;
-
-			int KEY;
-			int start_time_idx;
-			int end_time_idx;
-
-			int duration_hours;
-			int bit_duration;
-			*/
-		
-			struct user_reservation* newReservation = malloc(sizeof(struct user_reservation));
-			
-			newReservation->name = strdup(entry_data[0]);
-			newReservation->start_time = strdup(entry_data[1]);
-			newReservation->end_time = strdup(entry_data[2]);
-			newReservation->duration_hours = atoi(entry_data[3]);
-			newReservation -> next = NULL;	
-
-			cursor->next= newReservation;
-
-			return newReservation;
-		}	
+	strcpy(cmd, "./server/AWS/connect_aws.sh");
+	if (system(cmd) == -1){
+		perror("connect AWS ssh");
+		return FAILURE;
 	}
-	return NULL;
-}
 
-
-struct user_reservation* delete_reservation(char* name) {
-	if (reservations != NULL) {
-		printf(" LOCKER: delete_reservation\n");
-		if (search_reservation(name) != NULL) {
-			struct user_reservation* prev = NULL;
-			struct user_reservation* curr = reservations->head;
-			struct user_reservation* next = reservations->head->next;
-
-			// if first element first element of the LL
-			if (strcmp(curr->name, name) == 0) {
-				reservations->head = reservations->head->next;
-				return curr;
-			}
-
-			while (strcmp(curr->name, name) != 0 && curr != NULL) {
-				prev = curr;
-				curr = next;
-				next = curr->next;
-			}
-
-			if (prev)
-				prev -> next = next;
-
-			return curr;
-		}
-	}
-	return NULL;
-}
-
-
-struct user_reservation* modify_reservation(char* name) {
-	return NULL;
+	printf("\n[[[ connected to AWS cloud ]]]\n");
+	return SUCCESS;
 }

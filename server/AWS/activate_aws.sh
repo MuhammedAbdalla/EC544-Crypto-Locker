@@ -2,7 +2,7 @@
 
 KEYS_FOLDER=~/.keys
 EC2KEY=ec2sshkey.pem
-EC2_INSTANCE=ec2-user@18.222.161.150
+EC2_INSTANCE=ec2-user@3.145.164.11
 
 if [[ -d $KEYS_FOLDER ]]; then
     echo "keys folder exists"
