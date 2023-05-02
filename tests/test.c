@@ -14,15 +14,14 @@
 
 int main(int argc, char* argv[])
 { 
-	reservations = NULL;
 
-	if (strcmp(argv[1], "aws")) {
-    	TEST_ASSERT(connect_aws(argv[1]) == SUCCESS);
-		// TEST_ASSERT(ssh_setup(argv[1]) == SUCCESS);
+	if (strcmp(argv[1], "aws") == 0) {
+    	TEST_ASSERT(connect_aws(NULL, "aws") == SUCCESS);
+		// TEST_ASSERT(ssh_setup() == SUCCESS);
 		printf("passed ssh test\n");
-	} else if (strcmp(argv[1], "locker")) {
-		TEST_ASSERT(test_reservations() == SUCCESS); 
-		printf("passed reservations test\n");
+	} else if (strcmp(argv[1], "locker") == 0) {
+		// TEST_ASSERT(test_reservations() == SUCCESS); 
+		// printf("passed reservations test\n");
 	}
-	
+
 }

@@ -22,13 +22,10 @@ test_aws:
 	cp a.out server/a.out
 	./server/a.out $(ARGS)
 
-test_reserve:
-	gcc tests/tests_reserve.c server/lockerfunctions.c -g
+test:
+	gcc tests/test.c server/lockerfunctions.c -g
 	cp a.out server/a.out
-	./server/a.out $(ARGS)
-
-create_client: 
-
+	./a.out $(ARGS)
 
 
 clean:

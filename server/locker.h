@@ -3,8 +3,6 @@
 #ifndef LOCKERSERVER_H
     #define LOCKERSERVER_H
 
-    #define PORT 8080
-
     #define FAILURE 0
     #define SUCCESS 1
 
@@ -12,14 +10,16 @@
     #define MINS_IN_HOURS 60
     #define LOCKER_MIN_TIME_RESERVE 30
 
-    #define SSID "HomeNetwork"
-    #define PASS "I3@(+)Fries&Ch1ck3n"
+    #define SSID "BU Guest (unencrypted)"
+    #define PASS ""
 
-    #define AWS_IP "3.145.164.11"
-
+    #define AWS_IP "3.130.58.56"
+    #define AWS_PORT 8080
+    #define SERVER_PORT 80
+    
     // a user reservation
     struct user_reservation {
-        char* name;
+        char* user;
         char* start_time;
         char* end_time;
 
@@ -59,7 +59,7 @@
     */
 
     
-    int connect_aws(char*);
+    int connect_aws(const char*, const char*);
 
     int ssh_setup(void);
     
