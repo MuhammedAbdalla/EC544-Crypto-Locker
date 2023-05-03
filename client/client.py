@@ -23,7 +23,6 @@ print("date and time =", dt_string)
 
 #set the name of the server machine
 #change it to the name of your machine!
-# host = "172.20.185.58" 
 host = '3.130.58.56' 
 #set port number of server to connect on
 #must be same as set in server file

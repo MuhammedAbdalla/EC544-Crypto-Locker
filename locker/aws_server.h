@@ -14,7 +14,6 @@
     #define PASS ""
 
     #define AWS_IP "3.130.58.56"
-    // #define AWS_IP "172.20.185.58"
     #define AWS_PORT 8080
     #define SERVER_PORT 8080
     
