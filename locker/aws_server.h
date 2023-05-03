@@ -3,7 +3,7 @@
 #ifndef LOCKERSERVER_H
     #define LOCKERSERVER_H
 
-    #define FAILURE 0
+    #define FAILURE -1
     #define SUCCESS 1
 
     #define HOURS_IN_DAY 24
@@ -14,8 +14,9 @@
     #define PASS ""
 
     #define AWS_IP "3.130.58.56"
+    // #define AWS_IP "172.20.185.58"
     #define AWS_PORT 8080
-    #define SERVER_PORT 80
+    #define SERVER_PORT 8080
     
     // a user reservation
     struct user_reservation {
@@ -43,6 +44,10 @@
         char* USER;
     };
 
+    struct locker_keys {
+        char* key[1024];
+        char* ip_addr[1024];
+    };
 
      /*
         LOGIC:

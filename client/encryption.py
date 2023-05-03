@@ -28,24 +28,27 @@ Variables Files:
 # 6 openssl aes-256-cbc -a -d -in [cipertext] -pass pass:[msg]
 
 # openssl sh1/sha256/md5 -in [text file] -out [file]
-msg = "hello, Im Muhammed"
-os.system("openssl enc -aes-256-cbc -pbkdf2 -a -in plaintext -out ciphertext")
+# msg = "hello, Im Muhammed"
+# os.system("openssl enc -aes-256-cbc -pbkdf2 -a -in plaintext -out ciphertext")
 
 # create key pair
+
+key = {
+    "public":None,
+    "private":None
+} 
 
 def generateKey():
     key = {}
 
-    if not os.path.exists("./key.pem"): 
-        os.system("openssl genpkey -algorithm RSA -out key.pem")
+    if not os.path.exists(".enc/key.pem"): 
+        os.system("openssl genpkey -algorithm RSA -out enc/key.pem")
     
-    if not os.path.exists("./publicKey.pem"):
-        os.system("openssl pkey -in key.pem -pubout -out publicKey.pem")
+    if not os.path.exists(".enc/publicKey.pem"):
+        os.system("openssl pkey -in enc/key.pem -pubout -out enc/publicKey.pem")
 
-    key["private"] = open("key.pem",'r').read()
-    key["public"] = open("publicKey.pem",'r').read()
-
-    return key
+    key["private"] = open("enc/key.pem",'r').read()
+    key["public"] = open("enc/publicKey.pem",'r').read()
 
 def encryptMessage(msg):
 
@@ -53,20 +56,22 @@ def encryptMessage(msg):
     f.write(msg)
     f.close()
 
-    os.system("openssl rand -hex 8 >> password.pem")
-    os.system("openssl aes-256-cbc -pbkdf2 -a -in message -out encryptedMessage.enc -pbkdf2 -pass pass:[password.pem]")
-    os.system("openssl rsautl -encrypt -pubin -inkey publicKey.pem -in password.pem -out encryptedPassword.enc")
-    os.system("openssl base64 -in encryptedPassword.enc -out encryptedPassword64.enc")
-    os.system("rm password.pem message")
-    return open("encryptedMessage.enc",'r').read(), open("encryptedPassword64.enc",'r').read()
+    os.system("openssl rand -hex 8 >> enc/password.pem")
+    os.system("openssl aes-256-cbc -pbkdf2 -a -in message -out enc/encryptedMessage.enc -pbkdf2 -pass pass:[enc/password.pem]")
+    os.system("openssl rsautl -encrypt -pubin -inkey enc/publicKey.pem -in enc/password.pem -out enc/encryptedPassword.enc")
+    os.system("openssl base64 -in enc/encryptedPassword.enc -out enc/encryptedPassword64.enc")
+    os.system("rm enc/password.pem enc/message")
+    return open("enc/encryptedMessage.enc",'r').read(), open("enc/encryptedPassword64.enc",'r').read()
+
+def getPubKey():
+    if not os.path.exists(".enc/publicKey.pem"):
+        return open("enc/publicKey.pem",'r').read()
 
 
+# print(keys["public"])
+# print(keys["private"])
 
-keys = generateKey()
-print(keys["public"])
-print(keys["private"])
-
-encryptMessage(input("Enter a message: "))
+# encryptMessage(input("Enter a locker command (CREATE, DELETE):"))
 
 
 # opening a socket to the ESP32 from Docker

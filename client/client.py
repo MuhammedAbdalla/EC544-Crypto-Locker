@@ -1,43 +1,79 @@
 # import the socket library
 import socket
+import sys
+from datetime import date
+from datetime import datetime
+import encryption
+
+
+# keys
+encryption.generateKey()
+publicKey = encryption.getPubKey()
+
+
+# datetime object containing current date and time
+now = datetime.now()
+ 
+print("now =", now)
+
+# dd/mm/YY H:M:S
+dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+print("date and time =", dt_string)
+
+
 #set the name of the server machine
 #change it to the name of your machine!
-host = '3.130.58.56'
+# host = "172.20.185.58" 
+host = '3.130.58.56' 
 #set port number of server to connect on
 #must be same as set in server file
 port = 8080
 #create TCP/IP socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+hostname = socket.gethostname()
+IPAddr = socket.gethostbyname(hostname)
+
 #sets maximum size of a message
 size = 1024
 #connect to server
-s.connect((host,port))
+
 #create message
 #change the message with your first name and last name!
-message = 'FETCH'
-#encode message
-encodedMessage = message.encode()
-#send message to server
-s.send(encodedMessage)
-#get message from server
-data = s.recv(size)
-#decode message from server
-decodedData = data.decode()
-#close socket
-s.close()
-#print message
-print('[AWS]', decodedData)
+for i in range(0,10):
+    message = ['CREATE',hostname+str(i),IPAddr,dt_string,"key","","",i,"\0"]
+    #encode message
+
+    #send message to server
+    for i in range(0,len(message)):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((host,port))
+        s.send(str(message[i]).encode())
+        s.close()
 
 
-s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s2.connect((decodedData,8080))
+commands = [
+    ['DISPLAY',hostname+str(0),"","","","","","","\0"],
+    ['DELETE',hostname+str(0),"","","","","","","\0"],
+    ['DELETE',hostname+str(1),"","","","","","","\0"],
+    ['DELETE',hostname+str(2),"","","","","","","\0"],
+    ['DISPLAY',hostname+str(0),"","","","","","","\0"]
+]
 
-s2.send("CREATE")
-#get message from server
-data = s2.recv(size)
-#decode message from server
-decodedData = data.decode()
-#close socket
-s2.close()
-#print message
-print('[LOCKER]', decodedData)
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((host,port))
+
+# message = commands[0]
+# for i in range(0,len(message)):
+#     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#     s.connect((host,port))
+#     s.send(str(message[i]).encode())
+#     s.close()
+
+for cmd in commands:
+    for msg in cmd:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((host,port))
+        s.send(str(msg).encode())
+        s.close()
+

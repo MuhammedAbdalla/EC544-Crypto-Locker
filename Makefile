@@ -27,6 +27,9 @@ test:
 	cp a.out server/a.out
 	./a.out $(ARGS)
 
+create:
+	gcc locker/aws_server.c -g
+	./a.out
 
 clean:
 	rm -f *.o $(test_files) $(test_o_files)
