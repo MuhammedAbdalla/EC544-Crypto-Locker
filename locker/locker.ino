@@ -46,12 +46,15 @@ void setup()
     pinMode(3, OUTPUT);
 
     WiFiClient client;
-  
+    
     // SEND ACK --------------------------------------------------------------------------------------------
+    Serial.print(AWS_IP);
+    Serial.print(":");
+    Serial.println(AWS_PORT);
     while (!client.connect(AWS_IP, AWS_PORT)) {
       Serial.println("Connection failed.");
-      Serial.println("Waiting 5 seconds before retrying...");
-      delay(5000);
+      Serial.println("retrying...");
+      delay(1000);
     }
   
     client.print("ESP32-LOCKER");
@@ -85,12 +88,9 @@ void readResponse(WiFiClient *client){
   while(client->available()) {
     String line = client->readStringUntil('\r');
     Serial.print(line);
-    if (line == "CREATE") {
-     blinkLED(2);
-    } else if (line == "DELETE") {
+    if (line == "cmd") {
+      blinkLED(3);
       blinkLED(1);
-    } else if (line == "OPEN") {
-      digitalWrite(3, HIGH);
     }
   }
 
@@ -110,17 +110,16 @@ void loop(){
 
     
   WiFiClient client;
-  
-  // SEND ACK --------------------------------------------------------------------------------------------
-  if (!client.connect(AWS_IP, AWS_PORT)) {
-    Serial.println("Connection failed.");
-    Serial.println("Waiting 5 seconds before retrying...");
-    delay(5000);
-    return;
+//  
+//  // SEND ACK --------------------------------------------------------------------------------------------
+  if (client.connect(AWS_IP, AWS_PORT)) {
+      client.print("ESP32-LOCKER");
+      readResponse(&client);
+      Serial.println("line");
   }
   
-  client.print("ESP32-LOCKER");
-  readResponse(&client);
+//  client.print("ESP32-LOCKER");
+  
 //
 //  // READ CMDS --------------------------------------------------------------------------------------------
 //
@@ -135,6 +134,5 @@ void loop(){
 //  // -------------------------------------------------------------------------------------------------
 //  delay(1000);
 //  digitalWrite(3, HIGH);
-  Serial.println("line");
   delay(25);
 }

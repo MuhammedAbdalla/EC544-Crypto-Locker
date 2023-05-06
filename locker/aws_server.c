@@ -142,7 +142,9 @@ static void update_reservation() {
     reservations -> USER = reservations -> head -> user;
     if (reservations -> head == NULL) {
       reservations -> LOCKED = 0;
-    }
+    } else {
+		reservations -> LOCKED = 1;
+	}
   }
 }
 
@@ -208,8 +210,16 @@ void listen_aws(struct sockaddr_in server) {
 
 		printf("[SERVER] \"client msg %d: %s\"\n", i, buffer[i]);
 
-		if (strcmp(buffer[i], "ESP32-LOCKER") == 0)
-			break;
+		if (strcmp(buffer[i], "ESP32-LOCKER") == 0) {
+			printf("sending status to esp32");
+			esp32_fd = client_fd;	
+			if (reservations != NULL) {
+				char* str = "cmd";
+				// sprintf(str, "%d", reservations->LOCKED);
+				if (send(esp32_fd, str, strlen(str), 0) == FAILURE)
+					perror("esp32 message failed");
+			}
+		}
 		
 	}
 	
@@ -223,8 +233,7 @@ void listen_aws(struct sockaddr_in server) {
 	} else if (strcmp(buffer[0], "DISPLAY") == 0) {
 		print_reservations(reservations);
 	} else if (strcmp(buffer[0], "ESP32-LOCKER") == 0) {
-		printf("LOCKER CONNECT");
-		esp32_fd = client_fd;
+		printf("LOCKER CONNECT");	
 	}
 
 
@@ -243,9 +252,9 @@ void listen_aws(struct sockaddr_in server) {
 	// 		perror("esp32 message failed");
 	// }
 	
-	// if (strcmp(buffer[0], "ESP32-LOCKER") != 0) {
+	if (strcmp(buffer[0], "ESP32-LOCKER") != 0) {
 		close(client_fd);
-	// }
+	}
 }
 
 
